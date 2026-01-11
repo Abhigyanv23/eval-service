@@ -1,0 +1,43 @@
+name: rag_faithfulness
+version: 1
+task_type: rag
+description: Scores an answer produced by a retrieval-augmented system against the retrieved context passages.
+pass_threshold: 3.5
+dimensions:
+  - name: faithfulness
+    description: Every factual claim in the answer is supported by the retrieved context. Claims from outside the context count as unsupported even if they happen to be true.
+    weight: 2.0
+    min_score: 4
+    uses: [context]
+    anchors:
+      1: The answer contradicts the context or is mostly fabricated.
+      2: At least one material claim is unsupported or contradicts the context.
+      3: Core answer supported, but includes an unsupported minor detail.
+      4: All claims supported; slight over-generalization.
+      5: Every claim is directly supported by the context.
+    examples:
+      - output: "You can return items within 60 days, and shipping is always free."
+        score: 1
+        why: The context says 30 days and only free shipping on orders over $50 - both claims contradict it.
+  - name: relevance
+    description: The answer addresses the user's actual question directly, without drifting to unrelated material.
+    weight: 1.0
+    uses: [prompt]
+    anchors:
+      1: Does not address the question.
+      2: Mostly off-topic; the question is answered only incidentally.
+      3: Addresses the question but buries the answer or adds tangents.
+      4: Directly answers with minor tangents.
+      5: Directly and precisely answers the question.
+    examples: []
+  - name: completeness
+    description: The answer includes all the information in the context that the question needs (conditions, exceptions, steps). If the context lacks the answer, saying so counts as complete.
+    weight: 1.5
+    uses: [prompt, context, reference]
+    anchors:
+      1: Omits the information the question needs.
+      2: Gives part of the answer; misses key conditions or steps.
+      3: Gives the main answer; misses an important condition or exception.
+      4: Complete except for a minor detail.
+      5: Fully complete, including relevant conditions and exceptions.
+    examples: []

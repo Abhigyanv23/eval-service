@@ -1,0 +1,29 @@
+name: classification
+version: 1
+task_type: classification
+description: Scores a classification output (label plus optional rationale) against a reference label.
+pass_threshold: 4.0
+dimensions:
+  - name: correctness
+    description: The predicted label matches the reference label (or, without a reference, is the best label for the input).
+    weight: 3.0
+    min_score: 4
+    uses: [prompt, reference]
+    anchors:
+      1: Wrong label, and not a plausible confusion.
+      2: Wrong label, but a plausible neighbouring class.
+      3: Hedges between the right label and a wrong one.
+      4: Right label, stated with minor ambiguity.
+      5: Right label, stated unambiguously.
+    examples: []
+  - name: justification
+    description: Any rationale given cites features of the input that actually support the label.
+    weight: 1.0
+    uses: [prompt]
+    anchors:
+      1: Rationale is wrong or contradicts the label.
+      2: Rationale is generic and cites nothing in the input.
+      3: Rationale is partly grounded.
+      4: Rationale is grounded, with a small gap.
+      5: Rationale cites the decisive features of the input; or no rationale was requested and none was given.
+    examples: []

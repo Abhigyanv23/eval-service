@@ -1,0 +1,54 @@
+name: summarization
+version: 1
+task_type: summarization
+description: Scores a summary of a source document (the source document is in the prompt).
+pass_threshold: 3.5
+dimensions:
+  - name: faithfulness
+    description: Every claim in the summary is supported by the source document. No invented facts, numbers, names or causal links.
+    weight: 2.0
+    min_score: 4
+    uses: [prompt]
+    anchors:
+      1: Central claims contradict the source or are fabricated.
+      2: At least one material claim is unsupported or wrong (e.g. a wrong number, date or attribution).
+      3: Minor unsupported detail or overstated certainty, but main points are correct.
+      4: All claims supported; at most a slight paraphrase that shifts emphasis.
+      5: Every claim is directly supported by the source.
+    examples:
+      - output: "Revenue rose 40% after the company opened three new stores."
+        score: 2
+        why: The source says revenue rose 14% and does not link it to store openings - a wrong number and an invented causal link.
+  - name: coverage
+    description: The summary captures the key points a reader of the source would need. Judge against the source's main points, not trivia.
+    weight: 1.5
+    uses: [prompt, reference]
+    anchors:
+      1: Misses the main point of the document.
+      2: Captures the main point but misses most other key points.
+      3: Captures roughly half of the key points.
+      4: Captures nearly all key points; omits one secondary point.
+      5: Captures all key points.
+    examples: []
+  - name: conciseness
+    description: The summary is brief relative to the source, with no padding, repetition or irrelevant detail.
+    weight: 1.0
+    uses: [prompt]
+    anchors:
+      1: About as long as the source, or mostly filler.
+      2: Much longer than needed; lots of repetition or minor detail.
+      3: Some padding or tangents.
+      4: Tight, with one unnecessary phrase or detail.
+      5: Every sentence earns its place.
+    examples: []
+  - name: clarity
+    description: The summary is readable, well-organized and grammatical, and makes sense to someone who has not read the source.
+    weight: 0.5
+    uses: []
+    anchors:
+      1: Incoherent or unreadable.
+      2: Hard to follow; broken sentences or undefined references.
+      3: Understandable with effort.
+      4: Clear with minor awkwardness.
+      5: Clear, fluent and well-ordered.
+    examples: []

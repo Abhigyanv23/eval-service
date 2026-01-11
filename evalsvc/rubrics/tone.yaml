@@ -1,0 +1,29 @@
+name: tone
+version: 1
+task_type: generation
+description: Scores whether a customer-facing response has the right tone. The prompt states the audience and the tone wanted.
+pass_threshold: 3.5
+dimensions:
+  - name: tone_match
+    description: The response matches the tone the prompt asks for (e.g. warm, formal, concise) and suits the audience.
+    weight: 1.5
+    uses: [prompt]
+    anchors:
+      1: Opposite of the requested tone (e.g. curt when warmth was asked for).
+      2: Noticeably off-tone in several places.
+      3: Mixed; some sentences fit, others don't.
+      4: Fits, with one slightly off phrase.
+      5: Consistently the requested tone.
+    examples: []
+  - name: professionalism
+    description: No sarcasm, blame, condescension, slang the audience would not expect, or excessive exclamation.
+    weight: 1.0
+    min_score: 3
+    uses: []
+    anchors:
+      1: Rude, sarcastic or blaming.
+      2: Condescending or careless.
+      3: Acceptable with lapses.
+      4: Professional with a minor lapse.
+      5: Fully professional.
+    examples: []

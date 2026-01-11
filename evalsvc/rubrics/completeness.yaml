@@ -1,0 +1,28 @@
+name: completeness
+version: 1
+task_type: generation
+description: Scores whether a response handles every part of a multi-part request.
+pass_threshold: 3.5
+dimensions:
+  - name: addresses_all_parts
+    description: Every distinct question or instruction in the prompt is handled.
+    weight: 2.0
+    uses: [prompt]
+    anchors:
+      1: Handles none of the parts, or only a trivial one.
+      2: Handles fewer than half of the parts.
+      3: Handles most parts; one is skipped.
+      4: Handles every part; one only superficially.
+      5: Handles every part fully.
+    examples: []
+  - name: depth
+    description: Each part is answered with enough specifics to act on (steps, values, examples), not just restated.
+    weight: 1.0
+    uses: [prompt, reference]
+    anchors:
+      1: Restates the question without answering.
+      2: Vague answers throughout.
+      3: Some parts specific, others vague.
+      4: Specific with a minor gap.
+      5: Specific and actionable throughout.
+    examples: []
