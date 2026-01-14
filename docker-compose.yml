@@ -1,0 +1,61 @@
+x-app-env: &app-env
+  EVALSVC_DATABASE_URL: postgresql+psycopg://evalsvc:evalsvc@postgres:5432/evalsvc
+  EVALSVC_REDIS_URL: redis://redis:6379/0
+  EVALSVC_DEFAULT_JUDGE: ${EVALSVC_DEFAULT_JUDGE:-heuristic}
+  EVALSVC_ANTHROPIC_MODEL: ${EVALSVC_ANTHROPIC_MODEL:-claude-opus-5-5}
+  EVALSVC_OPENAI_MODEL: ${EVALSVC_OPENAI_MODEL:-gpt-4.1}
+  EVALSVC_API_KEY: ${EVALSVC_API_KEY:-}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: evalsvc
+      POSTGRES_PASSWORD: evalsvc
+      POSTGRES_DB: evalsvc
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evalsvc"]
+      interval: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 20
+
+  api:
+    build: .
+    environment: *app-env
+    ports: ["8000:8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 5s
+      retries: 20
+
+  worker:
+    build: .
+    command: celery -A evalsvc.tasks worker --loglevel=info --concurrency=4 -Q evals
+    environment: *app-env
+    depends_on:
+      api: {condition: service_healthy}
+
+  dashboard:
+    build: .
+    command: streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
+    environment:
+      EVALSVC_API_URL: http://api:8000
+      EVALSVC_API_KEY: ${EVALSVC_API_KEY:-}
+    ports: ["8501:8501"]
+    depends_on:
+      api: {condition: service_healthy}
+
+volumes:
+  pgdata:

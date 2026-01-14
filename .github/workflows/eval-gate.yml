@@ -1,0 +1,43 @@
+# Example release gate: a feature's pipeline calls the shared eval service and fails on regressions.
+# The service URL and key live in repo secrets; the dataset is the feature's golden set, scored with the
+# outputs from the candidate build.
+name: eval-gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements.txt
+      - run: pytest -q
+
+  quality-gate:
+    needs: tests
+    if: ${{ vars.EVALSVC_API_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install httpx
+      # In a real feature repo, a previous step generates outputs from the candidate build into this file.
+      - name: Gate support-rag release
+        env:
+          EVALSVC_API_URL: ${{ vars.EVALSVC_API_URL }}
+          EVALSVC_API_KEY: ${{ secrets.EVALSVC_API_KEY }}
+        run: >
+          python scripts/ci_gate.py
+          --dataset data/demo/support_rag_v1.jsonl
+          --feature support-rag --rubric rag_faithfulness --judge anthropic
+          --min-pass-rate 0.8 --min-dim faithfulness=4.0
+          --baseline previous --max-pass-rate-drop 0.05 --max-dimension-drop 0.2
+          --report-out gate-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: gate-report, path: gate-report.json}
