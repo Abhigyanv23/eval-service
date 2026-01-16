@@ -1,0 +1,36 @@
+[client]
+toolbarMode = "minimal"   # hide "Deploy" and developer menu items
+
+[browser]
+gatherUsageStats = false
+
+# Tokens from the validated default palette (light and dark are separate, not an automatic flip).
+[theme]
+baseRadius = "0.6rem"
+showWidgetBorder = true
+
+[theme.light]
+primaryColor = "#2a78d6"
+backgroundColor = "#f9f9f7"
+secondaryBackgroundColor = "#f0efec"
+textColor = "#0b0b0b"
+borderColor = "#e1e0d9"
+linkColor = "#256abf"
+dataframeHeaderBackgroundColor = "#f0efec"
+chartCategoricalColors = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"]
+
+[theme.light.sidebar]
+backgroundColor = "#f0efec"
+
+[theme.dark]
+primaryColor = "#3987e5"
+backgroundColor = "#0d0d0d"
+secondaryBackgroundColor = "#1a1a19"
+textColor = "#f0efec"
+borderColor = "#2c2c2a"
+linkColor = "#5598e7"
+dataframeHeaderBackgroundColor = "#1a1a19"
+chartCategoricalColors = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"]
+
+[theme.dark.sidebar]
+backgroundColor = "#141413"

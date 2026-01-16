@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="40" viewBox="0 0 220 40">
+  <rect x="2" y="4" width="32" height="32" rx="8" fill="#2a78d6"/>
+  <path d="M10 21.5l5 5 11-12" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="44" y="27" font-family="Source Sans Pro, Segoe UI, sans-serif" font-size="19" font-weight="700" fill="#7f7e78">Eval Service</text>
+</svg>
